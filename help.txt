@@ -10,7 +10,7 @@ flags:
         remove files from all child directories
 
     -h, --help
-        print this help
+        print this help message
 
     -i, --hidden
         affect hidden files (remove files that begin with '.')
