@@ -47,7 +47,24 @@ for i in range(1, len(sys.argv)):
             elif sys.argv[i] == "--pattern":
                 if i >= len(sys.argv) - 1:
                     parameters["directory"] = sys.argv[i]
-                parameters["pattern"] = sys.argv[i + 1]
+                elif i + 1 <= len(sys.argv):
+                    parameters["pattern"] = sys.argv[i + 1]
+                else:
+                    exit_on_syntax_error()
         else:
             for param in range(1, len(sys.argv[i])):
-                pass
+                if param == "h":
+                    parameters["help"] = True
+                elif param == "r":
+                    parameters["recursively"] = True
+                elif param == "i":
+                    parameters["hidden"] = True
+                elif param == "p":
+                    if i + 1 <= len(sys.argv):
+                        parameters["pattern"] = sys.argv[i + 1]
+                    else:
+                        exit_on_syntax_error()
+
+if parameters["help"]:
+    print_help()
+    exit(0)
