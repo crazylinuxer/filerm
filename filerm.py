@@ -1,5 +1,7 @@
+from typing import Iterable
 import os
 import sys
+import re
 
 
 def print_help():
@@ -18,8 +20,11 @@ parameters = {
     "recursively": False,
     "hidden": False,
     "pattern": None,
-    "directory": "./"
+    "directory": os.path.curdir
 }
+
+
+files_to_delete = []
 
 
 for i in range(1, len(sys.argv)):
@@ -68,3 +73,44 @@ for i in range(1, len(sys.argv)):
 if parameters["help"]:
     print_help()
     exit(0)
+
+
+def append_files(directory: str, files: Iterable[str]):
+    for file in files:
+        if parameters["pattern"] and re.fullmatch(parameters["pattern"], file):
+            if file[0] == '.':
+                if parameters["hidden"]:
+                    files_to_delete.append(os.path.join(directory, file))
+            else:
+                files_to_delete.append(os.path.join(directory, file))
+
+
+if parameters["recursively"]:
+    for directory_path, directory_names, file_names in os.walk(parameters["directory"]):
+        append_files(directory_path, file_names)
+else:
+    append_files(
+        parameters["directory"],
+        (
+            file for file in os.listdir(parameters["directory"]) if
+            os.path.isfile(os.path.join(parameters["directory"], file))
+        )
+    )
+
+
+if files_to_delete:
+    print("The following files will be removed:")
+    for file_name in files_to_delete:
+        print(file_name)
+    answer = input("Proceed? [y/N] ")
+    if answer in ('y', 'Y', 'д', 'Д'):
+        for file_name in files_to_delete:
+            try:
+                os.remove(file_name)
+            except PermissionError:
+                print(f"Failed to remove {file_name} (permission denied)", file=sys.stderr)
+            except FileNotFoundError:
+                print(f"Failed to remove {file_name} (file does not exist)", file=sys.stderr)
+    else:
+        print("Cancelled")
+
